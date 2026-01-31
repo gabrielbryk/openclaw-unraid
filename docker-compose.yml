@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  openclaw:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: openclaw:latest
+    container_name: openclaw-test
+    environment:
+      HOME: /home/node
+      TERM: xterm-256color
+      NODE_ENV: production
+      PUID: 99
+      PGID: 100
+      TZ: America/Chicago
+    volumes:
+      - ./appdata/.openclaw:/home/node/.openclaw:rw
+      - ./appdata/.openclaw/workspace:/home/node/.openclaw/workspace:rw
+    ports:
+      - "18789:18789"
+      - "18790:18790"
+    restart: unless-stopped
+    init: true
+    command:
+      - "node"
+      - "dist/index.js"
+      - "gateway"
+      - "--bind"
+      - "lan"
+      - "--port"
+      - "18789"

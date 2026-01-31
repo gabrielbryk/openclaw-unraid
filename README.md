@@ -275,27 +275,29 @@ The Dockerfile includes common skill dependencies to enable more OpenClaw skills
 | `ffmpeg` | Video/audio processing, frame extraction | ✅ Included |
 | `build-essential` | Compiling tools and dependencies | ✅ Included |
 
-### Optional Dependencies (Not Included)
+### Automatically Installed at Container Startup
 
-These can be added if needed, but aren't included by default (they require additional setup):
+These tools are automatically installed on the container's first startup (not in the image layer) to keep the image lean while enabling all skills:
 
-- **Homebrew** (`brew`) - For GitHub CLI, Gemini CLI, and many other tools
-  - Requires macOS or special Linux setup
-  - Used by: `github`, `gemini`, `coding-agent`, and 30+ other skills
-  - Installation: See [Homebrew installation](https://brew.sh)
+| Tool | Enables Skills | Status |
+|------|---|---|
+| **Go 1.25.5** | `goplaces` (Google Places API) | ✅ Auto-installed |
+| **GitHub CLI (`gh`)** | `github`, `gist`, and 15+ GitHub integration skills | ✅ Auto-installed |
+| **Gemini CLI** | `gemini` (Google's Gemini AI model) | ✅ Auto-installed |
+| **Claude/OpenAI CLI tools** (`llm`, `openai`) | Model usage tracking, direct API access | ✅ Auto-installed |
 
-- **Go runtime** (`go`) - For some specialized tools
-  - Used by: `goplaces`, and other Go-based skills
-  - Installation: See [Go installation](https://golang.org/doc/install)
+**How it works:**
+1. When the container starts, the entrypoint script checks if each tool exists
+2. If a tool is missing, it's automatically installed from official sources (apt, npm, etc.)
+3. Tools persist in mounted volumes across container restarts
+4. Subsequent container starts skip installation (tools already exist)
+5. **Zero manual steps** - skills enabled automatically!
 
-- **Claude/OpenAI CLI tools** (`llm`, `openai`, `claude`)
-  - Used by: Model usage tracking, direct API tools
-  - Installation: `npm install -g llm openai`
-
-To add these optional dependencies, you can:
-1. **Rebuild the Docker image** with additional packages
-2. **Mount volumes** from the host with pre-built tools
-3. **Use skill-specific installers** from the Control UI
+**Storage:**
+- Go tools → `/home/node/.local/go/bin` (persistent volume)
+- GitHub CLI → System `PATH` (installed via apt)
+- Gemini CLI → npm global (installed via npm)
+- Node CLI tools → npm global (installed via npm)
 
 ---
 

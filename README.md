@@ -257,9 +257,45 @@ docker exec openclaw node dist/index.js health
 
 - **Base Image**: `node:22-bookworm` (official Node.js LTS)
 - **Package Manager**: `pnpm` (per official OpenClaw recommendations)
+- **Included Dependencies**: git, curl, jq, python3, ffmpeg, build-essential
 - **Final Size**: ~2-3GB
 - **Build Time**: 10-15 minutes (first build), ~5 minutes (cached)
 - **Source**: Cloned from https://github.com/openclaw/openclaw
+
+### Included System Dependencies
+
+The Dockerfile includes common skill dependencies to enable more OpenClaw skills:
+
+| Dependency | Enables Skills | Install |
+|------------|----------------|---------|
+| `git` | GitHub integration, git operations | ✅ Included |
+| `curl` | Web requests, API calls | ✅ Included |
+| `jq` | JSON processing | ✅ Included |
+| `python3` | Python-based skills, automation | ✅ Included |
+| `ffmpeg` | Video/audio processing, frame extraction | ✅ Included |
+| `build-essential` | Compiling tools and dependencies | ✅ Included |
+
+### Optional Dependencies (Not Included)
+
+These can be added if needed, but aren't included by default (they require additional setup):
+
+- **Homebrew** (`brew`) - For GitHub CLI, Gemini CLI, and many other tools
+  - Requires macOS or special Linux setup
+  - Used by: `github`, `gemini`, `coding-agent`, and 30+ other skills
+  - Installation: See [Homebrew installation](https://brew.sh)
+
+- **Go runtime** (`go`) - For some specialized tools
+  - Used by: `goplaces`, and other Go-based skills
+  - Installation: See [Go installation](https://golang.org/doc/install)
+
+- **Claude/OpenAI CLI tools** (`llm`, `openai`, `claude`)
+  - Used by: Model usage tracking, direct API tools
+  - Installation: `npm install -g llm openai`
+
+To add these optional dependencies, you can:
+1. **Rebuild the Docker image** with additional packages
+2. **Mount volumes** from the host with pre-built tools
+3. **Use skill-specific installers** from the Control UI
 
 ---
 

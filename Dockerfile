@@ -54,9 +54,9 @@ echo "🚀 OpenClaw Gateway starting up..."
 # Install Go from official source if not present (for goplaces and other Go-based skills)
 # Debian repos have Go 1.19, but goplaces requires Go 1.25+
 if ! command -v go &> /dev/null; then
-    echo "📦 Installing Go 1.25.5 runtime for Go-based skills..."
-    GO_VERSION="1.25.5"
-    curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" | tar -xz -C /usr/local/
+    echo "📦 Installing Go 1.25.6 runtime for Go-based skills..."
+    GO_VERSION="1.25.6"
+    curl -fsSL "https://go.dev/dl/go\${GO_VERSION}.linux-amd64.tar.gz" | tar -xz -C /usr/local/
     ln -sf /usr/local/go/bin/go /usr/local/bin/go
 fi
 

@@ -95,8 +95,63 @@ if ! npm list -g llm &>/dev/null 2>&1; then
     npm install -g llm openai 2>/dev/null || true
 fi
 
+# ============================================================================
+# Additional NPM CLI tools
+# ============================================================================
+
+# obsidian-cli for Obsidian vault integration
+if ! command -v obsidian &> /dev/null && ! npm list -g obsidian-cli &>/dev/null 2>&1; then
+    echo "📝 Installing Obsidian CLI for vault integration..."
+    npm install -g obsidian-cli 2>/dev/null || true
+fi
+
+# ============================================================================
+# System packages (via apt) for additional CLI tools
+# ============================================================================
+
+# 1Password CLI (op command)
+if ! command -v op &> /dev/null; then
+    echo "🔐 Installing 1Password CLI (op) for password/secret management..."
+    (apt-get update && apt-get install -y --no-install-recommends 1password-cli && rm -rf /var/lib/apt/lists/*) 2>/dev/null || true
+fi
+
+# ffprobe (part of ffmpeg) - already have ffmpeg, but explicit check
+if ! command -v ffprobe &> /dev/null; then
+    echo "🎬 Ensuring ffprobe available for video analysis..."
+    apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/* 2>/dev/null || true
+fi
+
+# tmux for session control
+if ! command -v tmux &> /dev/null; then
+    echo "🧵 Installing tmux for terminal session control..."
+    apt-get update && apt-get install -y --no-install-recommends tmux && rm -rf /var/lib/apt/lists/* 2>/dev/null || true
+fi
+
+# ============================================================================
+# Cargo-based tools (Rust package manager) - for specialized CLIs
+# ============================================================================
+
+# Install Rust/Cargo if needed for Rust-based tools
+if ! command -v cargo &> /dev/null && [ -z "\$CARGO_SKIP" ]; then
+    echo "🦀 Installing Rust/Cargo for Rust-based CLI tools..."
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y 2>/dev/null || true
+    export PATH="/root/.cargo/bin:\$PATH"
+fi
+
+# spotify-player (Rust-based Spotify CLI)
+if ! command -v spotify_player &> /dev/null && command -v cargo &> /dev/null; then
+    echo "🎵 Installing Spotify Player CLI..."
+    cargo install spotify-player 2>/dev/null || true
+fi
+
+# sherpa-onnx-tts (Rust-based TTS)
+if ! command -v sherpa-onnx-tts &> /dev/null && command -v cargo &> /dev/null; then
+    echo "🗣️ Installing Sherpa ONNX TTS..."
+    cargo install sherpa-onnx 2>/dev/null || true
+fi
+
 # Export PATH to include optional tools
-export PATH="/home/node/bin:\$PATH"
+export PATH="/home/node/bin:/root/.cargo/bin:\$PATH"
 
 echo "✅ Skill support tools ready"
 echo "🌐 OpenClaw Gateway starting..."

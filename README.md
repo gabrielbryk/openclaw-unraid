@@ -277,27 +277,77 @@ The Dockerfile includes common skill dependencies to enable more OpenClaw skills
 
 ### Automatically Installed at Container Startup
 
-These tools are automatically installed on the container's first startup (not in the image layer) to keep the image lean while enabling all skills:
+These tools are automatically installed on the container's first startup (not in the image layer) to keep the image lean while enabling all skills. Installation only happens once - subsequent starts skip already-installed tools.
 
+#### NPM-based CLI Tools
 | Tool | Enables Skills | Status |
 |------|---|---|
-| **Go 1.25.5** | `goplaces` (Google Places API) | ✅ Auto-installed |
-| **GitHub CLI (`gh`)** | `github`, `gist`, and 15+ GitHub integration skills | ✅ Auto-installed |
-| **Gemini CLI** | `gemini` (Google's Gemini AI model) | ✅ Auto-installed |
-| **Claude/OpenAI CLI tools** (`llm`, `openai`) | Model usage tracking, direct API access | ✅ Auto-installed |
+| **GitHub CLI (`gh`)** | github, gist (15+ GitHub skills) | ✅ Auto-installed via apt |
+| **Gemini CLI** | gemini (Google AI) | ✅ Auto-installed via npm |
+| **Claude/OpenAI CLI** | model-usage, openai-whisper, openai-image-gen | ✅ Auto-installed via npm |
+| **Obsidian CLI** | obsidian (vault integration) | ✅ Auto-installed via npm |
 
-**How it works:**
-1. When the container starts, the entrypoint script checks if each tool exists
-2. If a tool is missing, it's automatically installed from official sources (apt, npm, etc.)
-3. Tools persist in mounted volumes across container restarts
-4. Subsequent container starts skip installation (tools already exist)
-5. **Zero manual steps** - skills enabled automatically!
+#### Go-based CLI Tools
+| Tool | Enables Skills | Status |
+|------|---|---|
+| **Go 1.25.5 runtime** | goplaces, other Go tools | ✅ Auto-installed from official source |
+| **goplaces** | goplaces (Google Places API) | ✅ Auto-installed via `go install` |
 
-**Storage:**
-- Go tools → `/home/node/.local/go/bin` (persistent volume)
-- GitHub CLI → System `PATH` (installed via apt)
-- Gemini CLI → npm global (installed via npm)
-- Node CLI tools → npm global (installed via npm)
+#### System Package Tools (via apt)
+| Tool | Enables Skills | Status |
+|------|---|---|
+| **1Password CLI (`op`)** | 1password (password/secret management) | ✅ Auto-installed via apt |
+| **ffprobe** | camsnap, video-frames (media analysis) | ✅ Already included (part of ffmpeg) |
+| **tmux** | tmux (terminal session control) | ✅ Auto-installed via apt |
+
+#### Rust-based CLI Tools (via Cargo)
+| Tool | Enables Skills | Status |
+|------|---|---|
+| **Rust/Cargo** | (required for Rust tools) | ✅ Auto-installed on demand |
+| **spotify-player** | spotify-player (Spotify playback control) | ✅ Auto-compiled via cargo |
+| **sherpa-onnx** | sherpa-onnx-tts (offline text-to-speech) | ✅ Auto-compiled via cargo |
+
+### Skills with External Requirements (Cannot be Fixed)
+
+These skills are **fundamentally blocked** and cannot be enabled in Docker:
+
+#### macOS-only Skills (No Linux Equivalent)
+- **apple-notes** - Requires macOS memo CLI
+- **apple-reminders** - Requires macOS remindctl
+- **bear-notes** - Requires macOS Bear app + grizzly CLI
+- **imsg** - Requires macOS iMessage infrastructure
+- **things-mac** - Requires macOS Things 3 app
+- **peekaboo** - Requires macOS UI automation
+
+#### API Key Required (Set via Environment Variables)
+Skills that are installed but require API keys to function:
+- **goplaces** - Needs `GOOGLE_PLACES_API_KEY`
+- **gog** - Needs Google Cloud credentials
+- **notion** - Needs `NOTION_API_KEY`
+- **slack** - Needs Slack workspace token
+- **trello** - Needs Trello API key
+- **openai-whisper-api** - Needs OpenAI API key
+- **openai-image-gen** - Needs OpenAI API key
+
+#### Hardware/Service Dependencies
+- **eightctl** - Requires Eight Sleep smart bed device
+- **openhue** - Requires Philips Hue smart lights
+- **sonoscli** - Requires Sonos speaker system
+- **blucli** - Requires BluOS compatible device
+- **ordercli** - Requires Foodora/Deliveroo account
+- **voice-call** - Requires OpenClaw voice plugin setup
+- **wacli** - Requires WhatsApp account setup
+
+#### Unavailable/Proprietary
+- **model-usage** - CodexBar CLI (proprietary usage tracking)
+- **nano-banana-pro** - Gemini 3 Pro Image generation (API-based)
+- **nano-pdf** - nano-pdf CLI (availability uncertain)
+- **oracle** - Oracle CLI (licensing required)
+- **blogwatcher** - blogwatcher CLI (availability uncertain)
+- **gifgrep** - gifsicle-based tool (availability uncertain)
+- **sag** - ElevenLabs TTS (requires API key + account)
+- **summarize** - Multiple fallback tools (mixed availability)
+- **local-places** - Requires goplaces + local proxy setup
 
 ---
 

@@ -26,4 +26,4 @@ ENV HOME=/home/node
 
 EXPOSE 18789 18790
 
-CMD ["node", "dist/index.js", "gateway", "--bind", "lan", "--port", "18789"]
+CMD ["node", "dist/index.js", "gateway", "--bind", "lan", "--port", "18789", "--allow-unconfigured"]

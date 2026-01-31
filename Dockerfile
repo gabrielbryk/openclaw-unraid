@@ -36,17 +36,45 @@ RUN pnpm ui:build
 RUN npm install -g /app/dist/cli.js || true && \
     ln -sf /app/dist/index.js /usr/local/bin/openclaw
 
-# Optional: Additional CLI tools for more skills
-# Uncomment to add these (requires separate installation or mounting):
-# - brew (GitHub CLI, Gemini CLI, etc.) - requires macOS/Homebrew setup
-# - go (some tools require Go runtime)
-# - llm (Claude/OpenAI CLI tools)
-# See README.md for installation instructions
+# Create entrypoint script for conditional tool installation
+# This allows tools to be installed at runtime without bloating the image
+COPY --chmod=755 <<EOF /usr/local/bin/docker-entrypoint.sh
+#!/bin/bash
+set -e
+
+# Create bin directory for optional tools
+mkdir -p /home/node/bin
+
+# Install Go if not present (for goplaces and other Go-based skills)
+if ! command -v go &> /dev/null; then
+    echo "📦 Installing Go runtime for skill support..."
+    apt-get update && apt-get install -y --no-install-recommends golang-go && rm -rf /var/lib/apt/lists/*
+fi
+
+# Install goplaces if not present
+if ! command -v goplaces &> /dev/null && [ -d "/home/node/.local/go/bin" ] || command -v go &> /dev/null; then
+    if command -v go &> /dev/null; then
+        echo "🌍 Installing goplaces (Google Places API CLI)..."
+        export GOPATH=/home/node/.local
+        go install github.com/steipete/goplaces/cmd/goplaces@latest 2>/dev/null || true
+        if [ -f "/home/node/.local/go/bin/goplaces" ]; then
+            ln -sf /home/node/.local/go/bin/goplaces /home/node/bin/goplaces
+        fi
+    fi
+fi
+
+# Export PATH to include optional tools
+export PATH="/home/node/bin:$PATH"
+
+# Start OpenClaw Gateway
+exec node dist/index.js gateway --bind lan --port 18789 --allow-unconfigured
+EOF
 
 # Runtime environment
 ENV NODE_ENV=production
 ENV HOME=/home/node
+ENV PATH=/home/node/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 EXPOSE 18789 18790
 
-CMD ["node", "dist/index.js", "gateway", "--bind", "lan", "--port", "18789", "--allow-unconfigured"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

@@ -20,6 +20,10 @@ RUN pnpm build
 RUN pnpm ui:install
 RUN pnpm ui:build
 
+# Install OpenClaw CLI globally
+RUN npm install -g /app/dist/cli.js || true && \
+    ln -sf /app/dist/index.js /usr/local/bin/openclaw
+
 # Runtime environment
 ENV NODE_ENV=production
 ENV HOME=/home/node

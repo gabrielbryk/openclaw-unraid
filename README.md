@@ -67,13 +67,33 @@ Container will start and be managed by Unraid.
 
 ## Getting Started After First Run
 
-### 1. Access the Gateway
+### 1. Access the Control UI
 
+**From local network:**
 ```
 http://10.0.0.2:18789
 ```
 
-The Gateway dashboard will prompt for authentication token (generated on first run).
+**From remote (requires SWAG reverse proxy):**
+```
+https://openclaw.gabebryk.com
+```
+
+### 1a. Approve Device Pairing
+
+The Control UI requires device pairing for security. When you first access it, a pairing request is generated:
+
+```bash
+# Check pending pairing requests
+ssh unraid "docker exec openclaw node dist/index.js devices list"
+
+# Approve the pending request (replace REQUEST_ID with actual ID)
+ssh unraid "docker exec openclaw node dist/index.js devices approve [REQUEST_ID]"
+```
+
+Then **refresh the browser** - it should connect successfully.
+
+**Note**: Device pairing requests expire after 5 minutes. If you miss it, just refresh the browser to generate a new request.
 
 ### 2. Run Onboarding Wizard
 

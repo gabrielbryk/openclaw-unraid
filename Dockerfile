@@ -45,14 +45,17 @@ set -e
 # Create bin directory for optional tools
 mkdir -p /home/node/bin
 
-# Install Go if not present (for goplaces and other Go-based skills)
+# Install Go from official source if not present (for goplaces and other Go-based skills)
+# Debian repos have Go 1.19, but goplaces requires Go 1.25+
 if ! command -v go &> /dev/null; then
-    echo "📦 Installing Go runtime for skill support..."
-    apt-get update && apt-get install -y --no-install-recommends golang-go && rm -rf /var/lib/apt/lists/*
+    echo "📦 Installing Go runtime from official source..."
+    GO_VERSION="1.25.5"
+    curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" | tar -xz -C /usr/local/
+    ln -sf /usr/local/go/bin/go /usr/local/bin/go
 fi
 
 # Install goplaces if not present
-if ! command -v goplaces &> /dev/null && [ -d "/home/node/.local/go/bin" ] || command -v go &> /dev/null; then
+if ! command -v goplaces &> /dev/null; then
     if command -v go &> /dev/null; then
         echo "🌍 Installing goplaces (Google Places API CLI)..."
         export GOPATH=/home/node/.local
